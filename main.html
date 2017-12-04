@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<script>var Data = {
+	addNewPerson: function() {
+		var Person = {};
+		if (!Validation.validateForm()) {
+			Person.name = firstName.val();
+			Person.surName = surName.val();
+			Person.gender = gender;
+			Person.dob = dateOfBirth.val();
+			Person.age = this.convertDateToAge(dateOfBirth.val());
+			Persons.push(Person);
+			this.showTable();
+			this.addRow(Person);
+			this.ShowHideAge();
+			this.resetForm();
+			$('#firstNameError').text('');
+			$('#surnameError').text('');
+			$('#gender_error').text('');
+		} else {
+			$('#firstNameError').text('Name is required');
+			$('#surnameError').text('Name is required');
+			$('#gender_error').text('You must select one');
+		}
+	},
+
+	
+	addRow: function(Person) {
+		var cell_name = $('<td class="td_1"></td>').text(Person.name);
+		var cell_lastName = $('<td class="td_2"></td>').text(Person.surName);
+		var cell_gender = $('<td class="td_3"></td>').text(Person.gender);
+		var cell_dob = $('<td class="td_4"></td>').text(Person.dob);
+		var cell_age = $('<td class="td_5"></td>').text(Person.age);
+
+		$('#myTable tbody')
+			.append('<tr></tr>')
+			.append(cell_name)
+			.append(cell_lastName)
+			.append(cell_gender)
+			.append(cell_dob)
+			.append(cell_age);
+		console.log('add row');
+	},
+
+	
+	resetForm: function() {
+		firstName.val('');
+		surName.val('');
+	},
+
+	
+	addGender: function() {
+		if (gender_man.is(':checked')) {
+			gender = 'Chlap';
+			console.log(gender);
+		}
+		if (gender_woman.is(':checked')) {
+			gender = 'Zena';
+			console.log(gender);
+		}
+	},
+
+	
+	showTable: function() {
+		$('#myTable').show();
+	},
+	
+	hideTable: function() {
+		if (Persons.length <= 0) {
+			$('#myTable').hide();
+		}
+	},
+
+	
+	convertDateToAge: function(dateString) {
+		var birthday = +new Date(dateString);
+		console.log(~~((Date.now() - birthday) / 31557600000));
+		return ~~((Date.now() - birthday) / 31557600000);
+	},
+	ShowHideAge: function() {
+		var isChecked = document.getElementById('convertDob').checked;
+		var column = $('.td_5');
+		if (isChecked) {
+			$('#textOfDobInput').text('Skry Vek');
+			$(column).show();
+		} else {
+			$('#textOfDobInput').text('Ukaz Vek');
+			$(column).hide();
+		}
+	},
+
+
+	setMaxValueForDatePicker: function() {
+		var today = new Date();
+		var dd = today.getDate();
+		var mm = today.getMonth() + 1; 
+		var yyyy = today.getFullYear();
+		if (dd < 10) {
+			dd = '0' + dd;
+		}
+		if (mm < 10) {
+			mm = '0' + mm;
+		}
+		today = yyyy + '-' + mm + '-' + dd;
+		console.log(today);
+		document.getElementById('dob').setAttribute('max', today);
+	}
+};
+var Util = {};
+var surName, firstName, dateOfBirth, form, gender_woman, gender_man, gender, table, age;
+var Persons = ['1'];
+
+Util.init = function() {
+	surName = $('#surName');
+	firstName = $('#firstName');
+	gender_man = $('#radio_man');
+	gender_woman = $('#radio_women');
+	gender = 'Chlap';
+	dateOfBirth = $('#dob');
+	form = $('#myform');
+	table = $('#myTable');
+	console.log('init variables');
+	Data.hideTable();
+	Data.setMaxValueForDatePicker();
+	Data.ShowHideAge();
+};
+
+$(document).ready(function() {
+	$('#firstName').on('keypress keyup', function() {
+		Validation.validateFirstName();
+	});
+
+	$('#surName').on('keypress keyup', function() {
+		Validation.validateLastName();
+	});
+
+	$('#radio_man').on('change', function() {
+		Data.addGender();
+	});
+
+	$('#radio_women').on('change', function() {
+		Data.addGender();
+	});
+	$('#convertDob').on('change', function() {
+		Data.ShowHideAge();
+	});
+	$('#send_button').on('click', function() {
+		Data.addNewPerson();
+	});
+}); 
+
+var Validation = {
+	validateFirstName: function() {
+		if (firstName.val().trim().length === 0) {
+			$('#firstNameError').text('Je potrebne zadat meno');
+			return true;
+		} else if (firstName.val().trim().length <= 2) {
+			$('#firstNameError').text('Meno musi byt dlhsie ako 2 znaky');
+			return true;
+		} else {
+			$('#firstNameError').text('');
+			return false;
+		}
+	},
+	validateLastName: function() {
+		if (surName.val().trim().length === 0) {
+			$('#surnameError').text('Je potrebne zadat priezvisko');
+			return true;
+		} else if (surName.val().trim().length <= 2) {
+			$('#surnameError').text('Priezvisko musi byt dlhsie ako 2 znaky');
+			return true;
+		} else {
+			$('#surnameError').text('');
+			return false;
+		}
+	},
+
+	validateForm: function() {
+		if (this.validateFirstName()) {
+			return true;
+		}
+		if (this.validateLastName()) {
+			return true;
+		} else return false;
+	}
+};
+
+
+var sort = (function() {
+    return{
+        compareFirstName :function(a,b) {
+            if (a.surName < b.surName){
+                return -1;
+            }
+
+            if (a.surName > b.surName){
+                return 1;
+            }
+            return 0;
+        },
+        orderByFirstName:function () {
+            Persons.forEach(function(element) {
+                console.log(element);
+            });
+        }
+
+    }
+
+
+})();
+</script>
+
+<body onload="Util.init()">
+
+<div class="wrapper">
+ <form id="myForm" name="form1" >
+     <div class="form_content">
+         <div class="form_group_wrapper">
+              <div class="form_group">
+                   <label class="label">Meno:</label>
+                   <input type="text" name="firstName" value="" id="firstName"
+                          
+                          autocomplete="off"
+                   >
+
+                   <span id="firstNameError" class="error"></span>
+              </div>
+         </div>
+         <div class="form_group_wrapper">
+              <div class="form_group">
+                   <label class="label">Priezvisko:</label>
+                   <input type="text" name="surName" value="" id="surName"
+                         
+                          autocomplete="off"
+                   >
+
+                   <span id="surnameError" class="error"></span>
+              </div>
+          </div>
+         <div class="form_group_wrapper">
+              <div class="form_group">
+               <label class="label">Datum narodenia:</label>
+                  <input type="date"  value="" id="dob" required>
+                  <span id=""></span>
+              </div>
+         </div>
+
+         <div class="form_group_wrapper">
+             <label class="label">Pohlavie:</label>
+
+               <div class="form_checkbox">
+                   <input type="radio" id="radio_man" name="gender" value="man" checked="checked"> Muz
+               </div >
+
+               <div class="form_checkbox">
+                   <input type="radio" id="radio_women" name="gender" value="woman"> Zena
+               </div>
+              
+         </div>
+         <div class="center">
+             <button type="button" class="send_button" id="send_button"> PRIDAJ </button>
+             <span id="form_error" class="error"></span>
+         </div>
+     </div>
+ </form>
+
+ 
+    <table border="1"  id="myTable">
+        <tbody>
+        <tr>
+            <td id="td_name" onclick="sort.orderByFirstName()">Meno</td>
+            <td id="td_surName">Priezvisko</td>
+            <td id="td_gender">Pohlavie</td>
+            <td id="td_dob">Datum Narodenia</td>
+            <td id="td_age">
+                <input type="checkbox" name="age" value="age" id="convertDob"/>
+                <span id="textOfDobInput">Zobraz Vek</span>
+               
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+
+</body>
+</html>
